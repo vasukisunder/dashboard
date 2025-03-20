@@ -31,7 +31,7 @@ export default function MasonryLayout({ children }: MasonryLayoutProps) {
 
   return (
     <div className="w-full h-full">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-fr gap-3 w-full h-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 grid-flow-dense auto-rows-fr gap-3 w-full h-full">
         {children}
       </div>
     </div>

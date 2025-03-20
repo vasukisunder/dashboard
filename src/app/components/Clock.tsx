@@ -28,7 +28,7 @@ export default function Clock() {
   };
   
   return (
-    <Tile size="wide" className="col-span-2 flex items-center justify-center" title="">
+    <Tile size="wide" className="col-span-2 flex items-center justify-center">
       <div className="text-4xl sm:text-5xl font-mono tracking-wider">
         {formatTime(time)}
       </div>

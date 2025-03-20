@@ -2,10 +2,10 @@
 
 import { ReactNode } from 'react';
 
-export type TileSize = 'small' | 'medium' | 'large' | 'wide' | 'tall';
+export type TileSize = 'small' | 'medium' | 'large' | 'wide' | 'tall' | 'squarish';
 
 interface TileProps {
-  title?: string;
+  title?: string; // Keeping this for backward compatibility but won't display it
   size?: TileSize;
   children: ReactNode;
   className?: string;
@@ -17,10 +17,11 @@ const sizeClasses = {
   medium: 'col-span-1 h-full',
   large: 'col-span-2 h-full',
   wide: 'col-span-2 h-full',
-  tall: 'col-span-1 h-full'
+  tall: 'col-span-1 h-full',
+  squarish: 'col-span-1 row-span-2 h-full'
 };
 
-export default function Tile({ title, size = 'medium', children, className = '' }: TileProps) {
+export default function Tile({ size = 'medium', children, className = '' }: TileProps) {
   return (
     <div 
       className={`
@@ -29,16 +30,13 @@ export default function Tile({ title, size = 'medium', children, className = '' 
         border border-[var(--tile-border)]
         p-4
         overflow-auto 
-        flex flex-col 
+        flex items-center justify-center
         transition-all duration-200
         h-full w-full
         ${className}
       `}
     >
-      {title && <h3 className="text-lg font-medium mb-3 opacity-80">{title}</h3>}
-      <div className="flex-1 flex items-center justify-center overflow-auto">
-        {children}
-      </div>
+      {children}
     </div>
   );
 } 
