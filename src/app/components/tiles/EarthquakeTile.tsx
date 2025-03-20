@@ -62,18 +62,36 @@ export default function EarthquakeTile({
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            Recent Earthquake
+          </div>
           Loading earthquake data...
         </div>
       </Tile>
     );
   }
 
-  if (error || !quakeData) {
+  if (error) {
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            Recent Earthquake
+          </div>
+          Unable to load earthquake data
+        </div>
+      </Tile>
+    );
+  }
+
+  if (!quakeData) {
+    return (
+      <Tile size={size}>
+        <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            Recent Earthquake
+          </div>
           No earthquake data available
-          {error && <p className="text-red-500 mt-2 text-xs">{error}</p>}
         </div>
       </Tile>
     );
@@ -81,24 +99,20 @@ export default function EarthquakeTile({
 
   return (
     <Tile size={size}>
-      <div className="whitespace-pre-line relative w-full text-sm text-left">
-        {quakeData.magnitude > 0 ? (
-          <div>
-            Earthquake {quakeData.location} with a magnitude of {quakeData.magnitude.toFixed(1)} happened {quakeData.timeAgo} →
-          </div>
-        ) : (
-          <div>
-            {quakeData.location} →
-          </div>
-        )}
+      <div className="w-full text-sm text-left">
+        <div className="text-xs text-gray-500 mb-1">
+          Recent Earthquake
+        </div>
+        A magnitude {quakeData.magnitude} earthquake was detected {quakeData.location}
         {quakeData.url && (
           <a 
-            href={quakeData.url} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="absolute inset-0 z-10"
-            aria-label={`View details about earthquake: Magnitude ${quakeData.magnitude.toFixed(1)} ${quakeData.location}`}
-          />
+            href={quakeData.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+          >
+            View details
+          </a>
         )}
       </div>
     </Tile>

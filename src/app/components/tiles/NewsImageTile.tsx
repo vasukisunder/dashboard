@@ -87,6 +87,9 @@ export default function NewsImageTile({
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            News Image
+          </div>
           Loading news...
         </div>
       </Tile>
@@ -97,6 +100,9 @@ export default function NewsImageTile({
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            News Image
+          </div>
           Unable to load news: {error}
         </div>
       </Tile>
@@ -107,6 +113,9 @@ export default function NewsImageTile({
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            News Image
+          </div>
           No news image available
         </div>
       </Tile>
@@ -122,19 +131,23 @@ export default function NewsImageTile({
           style={{ backgroundImage: `url(${newsData.photo_url})` }}
         />
         <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/70">
+          <div className="text-xs text-gray-400 mb-1">
+            {newsData.section ? `${newsData.section.charAt(0).toUpperCase() + newsData.section.slice(1)} News` : 'News'}
+          </div>
           <p className="truncate text-sm text-left text-white">
-            {newsData.headline} →
+            {newsData.headline}
           </p>
+          {newsData.link && (
+            <a 
+              href={newsData.link} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+            >
+              Read more
+            </a>
+          )}
         </div>
-        {newsData.link && (
-          <a 
-            href={newsData.link} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="absolute inset-0 z-10"
-            aria-label={`Read more about: ${newsData.headline}`}
-          />
-        )}
       </div>
     </Tile>
   );

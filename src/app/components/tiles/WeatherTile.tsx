@@ -174,7 +174,10 @@ export default function WeatherTile({
 
   return (
     <Tile size={size}>
-      <div className="text-sm text-left whitespace-pre-line">
+      <div className="w-full text-sm text-left">
+        <div className="text-xs text-gray-500 mb-1">
+          Weather Update
+        </div>
         Weather in {weatherData.city} is {weatherData.condition.toLowerCase()} and {weatherData.temperature}°C.
       </div>
     </Tile>

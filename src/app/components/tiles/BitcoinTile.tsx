@@ -112,8 +112,22 @@ export default function BitcoinTile({
 
   return (
     <Tile size={size}>
-      <div className="text-sm text-left whitespace-pre-line">
-        {getBitcoinText()}
+      <div className="w-full text-sm text-left">
+        <div className="text-xs text-gray-500 mb-1">
+          Bitcoin Price
+        </div>
+        BTC: ${bitcoinData.price.toLocaleString()}
+        <div className="text-xs mt-1">
+          {bitcoinData.changePercent24h >= 0 ? '↑' : '↓'} {Math.abs(bitcoinData.changePercent24h).toFixed(2)}% today
+        </div>
+        <a 
+          href="https://coinmarketcap.com/currencies/bitcoin/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+        >
+          View chart
+        </a>
       </div>
     </Tile>
   );

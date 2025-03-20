@@ -198,7 +198,18 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
   return (
     <Tile size={size}>
       <div className="w-full text-sm text-left">
+        <div className="text-xs text-gray-500 mb-1">
+          ISS Location
+        </div>
         The ISS is currently flying over {location}
+        <a 
+          href="https://spotthestation.nasa.gov/tracking_map.cfm"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+        >
+          View tracker
+        </a>
       </div>
     </Tile>
   );

@@ -10,7 +10,7 @@ interface StockData {
   changePercent: number;
 }
 
-interface StockTileProps {
+interface MultiStockTileProps {
   size?: TileSize;
   refreshTimestamp?: Date;
   uniqueId?: string;
@@ -20,14 +20,14 @@ interface StockTileProps {
 const INDICES = [
   { symbol: '^GSPC', name: 'S&P 500' },
   { symbol: '^IXIC', name: 'NASDAQ' },
-  { symbol: '^DJI', name: 'Dow' },
+  { symbol: '^DJI', name: 'Dow Jones' },
 ];
 
-export default function StockTile({ 
-  size = 'medium', 
+export default function MultiStockTile({ 
+  size = 'squarish', 
   refreshTimestamp,
   uniqueId = Math.random().toString(36).substring(7)
-}: StockTileProps) {
+}: MultiStockTileProps) {
   const [stockData, setStockData] = useState<StockData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -38,7 +38,7 @@ export default function StockTile({
         setIsLoading(true);
         setError(null);
         
-        console.log('Fetching stock market data...');
+        console.log('Fetching stock market data for multiple indices...');
         
         // Fetch from our API route with force refresh
         const url = `/api/stocks?forceRefresh=${!!refreshTimestamp}&t=${Date.now()}`;
@@ -57,7 +57,7 @@ export default function StockTile({
         }
         
         const data = await response.json();
-        console.log('Stock data received:', data);
+        console.log('Stock data received for multiple indices:', data);
         
         setStockData(data);
       } catch (err) {
@@ -84,7 +84,10 @@ export default function StockTile({
   if (isLoading) {
     return (
       <Tile size={size}>
-        <div className="text-sm text-left whitespace-pre-line">
+        <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            Stock Markets
+          </div>
           Loading stock data...
         </div>
       </Tile>
@@ -94,61 +97,48 @@ export default function StockTile({
   if (error && stockData.length === 0) {
     return (
       <Tile size={size}>
-        <div className="text-sm text-left whitespace-pre-line">
-          Unable to load stock data.
-          {process.env.NODE_ENV === 'development' && (
-            <>
-              {"\n"}
-              Error: {error}
-            </>
-          )}
+        <div className="w-full text-sm text-left">
+          <div className="text-xs text-gray-500 mb-1">
+            Stock Markets
+          </div>
+          Unable to load stock data
         </div>
       </Tile>
     );
   }
 
-  // Format the stock data for display
-  const formatStockChange = (change: number, changePercent: number) => {
-    const sign = change >= 0 ? '+' : '';
-    return `${sign}${changePercent.toFixed(1)}%`;
-  };
-
-  const getStockText = () => {
-    const stocks = stockData.map(stock => {
-      const indexInfo = INDICES.find(i => i.symbol === stock.symbol);
-      const name = indexInfo?.name || stock.symbol;
-      const changeText = formatStockChange(stock.change, stock.changePercent);
-      return `${name} is ${stock.changePercent >= 0 ? 'up' : 'down'} ${Math.abs(stock.changePercent).toFixed(1)}% today`;
-    });
-    
-    if (stocks.length === 0) return "No stock data available";
-    
-    // Join with periods
-    return stocks.join(". ") + ".";
-  };
-
   return (
     <Tile size={size}>
       <div className="w-full text-sm text-left">
         <div className="text-xs text-gray-500 mb-1">
-          Stock Market
+          Stock Markets
         </div>
+        
         {stockData.length > 0 && (
-          <>
-            {INDICES.find(index => index.symbol === stockData[0].symbol)?.name || stockData[0].symbol}
-            <div className="text-xs mt-1">
-              {stockData[0].changePercent >= 0 ? '↑' : '↓'} {Math.abs(stockData[0].changePercent).toFixed(2)}% today
-            </div>
-            <a 
-              href={`https://finance.yahoo.com/quote/${stockData[0].symbol}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="block mt-1 text-xs text-blue-400 hover:text-blue-300"
-            >
-              View details →
-            </a>
-          </>
+          <div className="flex justify-between">
+            {stockData.map((stock, index) => {
+              const indexInfo = INDICES.find(i => i.symbol === stock.symbol);
+              const name = indexInfo?.name || stock.symbol;
+              return (
+                <div key={stock.symbol} className="text-center">
+                  <div>{name}</div>
+                  <div className="text-xs mt-1">
+                    {stock.changePercent >= 0 ? '↑' : '↓'} {Math.abs(stock.changePercent).toFixed(2)}%
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         )}
+        
+        <a 
+          href="https://finance.yahoo.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block mt-3 text-xs text-gray-500 hover:text-gray-400"
+        >
+          View markets
+        </a>
       </div>
     </Tile>
   );

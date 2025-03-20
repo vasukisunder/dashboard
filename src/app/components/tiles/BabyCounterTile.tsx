@@ -50,8 +50,11 @@ export default function BabyCounterTile({
 
   return (
     <Tile size={size}>
-      <div className="text-sm text-left whitespace-pre-line">
-        Approximately {formattedCount} babies have been born in the world today.
+      <div className="w-full text-sm text-left">
+        <div className="text-xs text-gray-500 mb-1">
+          World Population
+        </div>
+        {formattedCount} babies born today
       </div>
     </Tile>
   );

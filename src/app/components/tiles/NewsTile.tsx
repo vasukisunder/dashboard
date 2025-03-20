@@ -105,18 +105,20 @@ export default function NewsTile({ section, size = "wide", refreshTimestamp }: N
 
   return (
     <Tile size={size}>
-      <div className="whitespace-pre-line relative w-full text-sm text-left">
-        <div>
-          Latest news: {newsData.headline} →
+      <div className="w-full text-sm text-left">
+        <div className="text-xs text-gray-500 mb-1">
+          Latest News
         </div>
+        {newsData.headline}
         {newsData.link && (
           <a 
             href={newsData.link} 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="absolute inset-0 z-10"
-            aria-label={`Read more about: ${newsData.headline}`}
-          />
+            className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+          >
+            Read more
+          </a>
         )}
       </div>
     </Tile>

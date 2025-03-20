@@ -13,6 +13,8 @@ import StockTile from './components/tiles/StockTile';
 import BitcoinTile from './components/tiles/BitcoinTile';
 import BabyCounterTile from './components/tiles/BabyCounterTile';
 import ISSTile from './components/tiles/ISSTile';
+import OnThisDayTile from './components/tiles/OnThisDayTile';
+import MultiStockTile from './components/tiles/MultiStockTile';
 import { useCallback, useState } from 'react';
 import { TileSize } from './components/Tile';
 
@@ -104,9 +106,10 @@ export default function Home() {
           <div className="text-center whitespace-pre-line">#1 on Global Charts: "Example Song" by Artist</div>
         </Tile>
         
-        <Tile size="squarish">
-          <div className="text-center whitespace-pre-line">Word of the Day{"\n"}{"\n"}Ephemeral{"\n"}{"\n"}lasting for a very short time</div>
-        </Tile>
+        <OnThisDayTile 
+          size="squarish" 
+          refreshTimestamp={refreshTimestamp}
+        />
         
         <NewsImageTile 
           size="squarish" 
@@ -146,9 +149,11 @@ export default function Home() {
           section="world"
         />
 
-        <Tile size="squarish">
-          <div className="text-center whitespace-pre-line">5678</div>
-        </Tile>       
+        <MultiStockTile 
+          size="squarish" 
+          refreshTimestamp={refreshTimestamp}
+          uniqueId="multistocks1"
+        />
       </MasonryLayout>
     </Dashboard>
   );

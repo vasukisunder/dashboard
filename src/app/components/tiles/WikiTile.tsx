@@ -82,18 +82,20 @@ export default function WikiTile({
 
   return (
     <Tile size={size}>
-      <div className="whitespace-pre-line relative w-full text-sm text-left">
-        <div>
-          {wikiData.title} was just updated on Wikipedia →
+      <div className="w-full text-sm text-left">
+        <div className="text-xs text-gray-500 mb-1">
+          Wikipedia
         </div>
+        Someone just updated the page for {wikiData.title}
         {wikiData.link && (
           <a 
-            href={wikiData.link} 
-            target="_blank" 
-            rel="noopener noreferrer" 
-            className="absolute inset-0 z-10"
-            aria-label={`View Wikipedia article: ${wikiData.title}`}
-          />
+            href={wikiData.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+          >
+            Read more
+          </a>
         )}
       </div>
     </Tile>
