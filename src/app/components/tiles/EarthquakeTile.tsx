@@ -34,7 +34,7 @@ export default function EarthquakeTile({
         setIsLoading(true);
         setError(null);
         
-        const response = await fetch(`/api/earthquake?uniqueId=${uniqueId}`);
+        const response = await fetch(`/api/earthquake?uniqueId=${uniqueId}&t=${Date.now()}`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch earthquake data: ${response.status}`);
@@ -55,8 +55,17 @@ export default function EarthquakeTile({
       }
     };
 
+    // Fetch immediately on mount
     fetchEarthquakeData();
-  }, [refreshTimestamp, uniqueId]);
+    
+    // Set up interval to fetch every 10 seconds
+    const interval = setInterval(() => {
+      fetchEarthquakeData();
+    }, 10000);
+    
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, [uniqueId]); // Remove refreshTimestamp dependency
 
   if (isLoading) {
     return (

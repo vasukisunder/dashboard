@@ -70,8 +70,17 @@ export default function NewsTile({ section, size = "wide", refreshTimestamp }: N
       }
     };
 
+    // Fetch immediately on mount
     fetchNews();
-  }, [section, refreshTimestamp]);
+    
+    // Set up interval to fetch every 20 seconds
+    const interval = setInterval(() => {
+      fetchNews();
+    }, 20000);
+    
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, [section]); // Remove refreshTimestamp dependency
 
   if (isLoading) {
     return (

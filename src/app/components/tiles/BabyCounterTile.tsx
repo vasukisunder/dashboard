@@ -18,35 +18,51 @@ export default function BabyCounterTile({
   size = 'small', 
   refreshTimestamp 
 }: BabyCounterTileProps) {
-  const [babyCount, setBabyCount] = useState<number>(0);
+  const [totalBabies, setTotalBabies] = useState<number>(0);
+  const [startTime, setStartTime] = useState<number>(0);
 
   useEffect(() => {
-    // Calculate how many babies born so far today
-    const calculateBabiesBorn = () => {
-      const now = new Date();
+    // Initialize counter with babies born so far today
+    const now = new Date();
+    const start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    const secondsToday = Math.floor((now.getTime() - start.getTime()) / 1000);
+    const initialCount = Math.floor(secondsToday * BABIES_PER_SECOND);
+    
+    setTotalBabies(initialCount);
+    setStartTime(Date.now());
+    
+    // Set up animation frame to update counter continuously
+    let animationFrameId: number;
+    let lastUpdateTime = Date.now();
+    
+    const updateCounter = () => {
+      const currentTime = Date.now();
+      const elapsedSeconds = (currentTime - lastUpdateTime) / 1000;
       
-      // Get seconds elapsed since midnight today
-      const start = new Date(now);
-      start.setHours(0, 0, 0, 0);
-      const secondsToday = Math.floor((now.getTime() - start.getTime()) / 1000);
+      // Only update if enough time has passed to add at least 1 baby
+      if (elapsedSeconds >= 1 / BABIES_PER_SECOND) {
+        const newBabies = Math.floor(elapsedSeconds * BABIES_PER_SECOND);
+        setTotalBabies(prevCount => prevCount + newBabies);
+        lastUpdateTime = currentTime;
+      }
       
-      // Calculate babies born
-      const count = Math.floor(secondsToday * BABIES_PER_SECOND);
-      setBabyCount(count);
+      animationFrameId = requestAnimationFrame(updateCounter);
     };
-
-    // Calculate immediately
-    calculateBabiesBorn();
     
-    // Set up interval to recalculate every 10 seconds
-    const intervalId = setInterval(calculateBabiesBorn, 10000);
+    // Start the continuous update
+    animationFrameId = requestAnimationFrame(updateCounter);
     
-    // Clean up interval on unmount
-    return () => clearInterval(intervalId);
-  }, [refreshTimestamp]); // Recalculate when dashboard refreshes
+    // Clean up animation frame on unmount
+    return () => {
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+    };
+  }, []); // Run once on mount, independent of refreshTimestamp
 
   // Format the count with commas
-  const formattedCount = new Intl.NumberFormat('en-US').format(babyCount);
+  const formattedCount = new Intl.NumberFormat('en-US').format(Math.floor(totalBabies));
 
   return (
     <Tile size={size}>

@@ -54,7 +54,7 @@ export default function WeatherTile({
           // Use uniqueId to get a different city for each tile
           if (uniqueId) {
             // Add current timestamp to ensure different cities on refresh
-            const hashInput = uniqueId + (refreshTimestamp ? refreshTimestamp.getTime().toString() : Date.now().toString());
+            const hashInput = uniqueId + Date.now().toString();
             const hash = [...hashInput].reduce((acc, char) => acc + char.charCodeAt(0), 0);
             
             // Use the list of reliable cities instead of majorCities
@@ -70,7 +70,7 @@ export default function WeatherTile({
         }
         
         // Fetch directly from weatherapi.com
-        const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(cityToFetch)}`;
+        const url = `https://api.weatherapi.com/v1/current.json?key=${API_KEY}&q=${encodeURIComponent(cityToFetch)}&t=${Date.now()}`;
         
         console.log(`Fetching weather for: ${cityToFetch}`);
         
@@ -133,8 +133,17 @@ export default function WeatherTile({
       }
     };
 
+    // Fetch immediately on mount
     fetchWeather();
-  }, [city, refreshTimestamp, uniqueId]);
+    
+    // Set up interval to fetch every 10 seconds
+    const interval = setInterval(() => {
+      fetchWeather();
+    }, 10000);
+    
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, [city, uniqueId]); // Remove refreshTimestamp dependency
 
   if (isLoading) {
     return (

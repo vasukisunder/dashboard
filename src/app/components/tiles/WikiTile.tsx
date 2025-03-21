@@ -33,7 +33,7 @@ export default function WikiTile({
         setError(null);
         
         // Construct URL with uniqueId to prevent duplicate results
-        const url = `/api/wikipedia?preventDuplicates=true&uniqueId=${uniqueId}&refresh=${!!refreshTimestamp}`;
+        const url = `/api/wikipedia?preventDuplicates=true&uniqueId=${uniqueId}&refresh=${Date.now()}`;
         
         const response = await fetch(url);
         
@@ -56,8 +56,17 @@ export default function WikiTile({
       }
     };
 
+    // Fetch immediately on mount or refreshTimestamp change
     fetchWikiUpdate();
-  }, [refreshTimestamp, uniqueId]);
+    
+    // Then set up an interval to fetch every 5 seconds
+    const interval = setInterval(() => {
+      fetchWikiUpdate();
+    }, 5000);
+    
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(interval);
+  }, [uniqueId]); // Only depend on uniqueId, not refreshTimestamp
 
   if (isLoading) {
     return (
