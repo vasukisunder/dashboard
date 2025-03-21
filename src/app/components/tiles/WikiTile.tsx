@@ -33,7 +33,7 @@ export default function WikiTile({
         setError(null);
         
         // Construct URL with uniqueId to prevent duplicate results
-        const url = `/api/wikipedia?preventDuplicates=true&uniqueId=${uniqueId}&refresh=${Date.now()}`;
+        const url = `/api/wikipedia?preventDuplicates=true&uniqueId=${uniqueId}&refresh=true&t=${Date.now()}`;
         
         const response = await fetch(url);
         
@@ -66,7 +66,7 @@ export default function WikiTile({
     
     // Clean up the interval when the component unmounts
     return () => clearInterval(interval);
-  }, [uniqueId]); // Only depend on uniqueId, not refreshTimestamp
+  }, [uniqueId, refreshTimestamp]); // Depend on uniqueId and refreshTimestamp
 
   if (isLoading) {
     return (

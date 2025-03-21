@@ -120,7 +120,7 @@ export default function MultiStockTile({
               const indexInfo = INDICES.find(i => i.symbol === stock.symbol);
               const name = indexInfo?.name || stock.symbol;
               return (
-                <div key={stock.symbol} className="text-center">
+                <div key={stock.symbol} className="text-center text-xxs font-mono">
                   <div>{name}</div>
                   <div className="text-xs mt-1">
                     {stock.changePercent >= 0 ? '↑' : '↓'} {Math.abs(stock.changePercent).toFixed(2)}%

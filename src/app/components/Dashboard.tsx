@@ -26,7 +26,7 @@ export default function Dashboard({
 
   return (
     <main className="h-screen w-full bg-[var(--background)] flex items-center justify-center">
-      <div className="w-full h-full max-h-screen p-3">
+      <div className="w-full h-full max-h-screen p-1">
         {children}
       </div>
     </main>
