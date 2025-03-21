@@ -28,9 +28,15 @@ export default function Clock() {
   };
   
   return (
-    <Tile size="wide" className="col-span-2 flex items-center justify-center">
-      <div className="text-4xl sm:text-5xl font-mono tracking-wider">
-        {formatTime(time)}
+    <Tile size="wide" className="col-span-2">
+      <div className="w-full flex justify-between items-center">
+        <div className="text-2xl sm:text-3xl font-mono tracking-wider">
+          {formatTime(time)}
+        </div>
+        <div className="text-xs text-gray-500 text-right">
+          <div>Real-time dashboard displaying updating content</div>
+          <div>Custom data tiles from multiple APIs with auto-refresh</div>
+        </div>
       </div>
     </Tile>
   );

@@ -15,6 +15,8 @@ import BabyCounterTile from './components/tiles/BabyCounterTile';
 import ISSTile from './components/tiles/ISSTile';
 import OnThisDayTile from './components/tiles/OnThisDayTile';
 import MultiStockTile from './components/tiles/MultiStockTile';
+import InternetStatsTile from './components/tiles/InternetStatsTile';
+import EnvironmentalImpactTile from './components/tiles/EnvironmentalImpactTile';
 import { useCallback, useState } from 'react';
 import { TileSize } from './components/Tile';
 
@@ -44,7 +46,7 @@ export default function Home() {
           uniqueId="weather1" 
         />
         
-        <ISSTile size="medium" refreshTimestamp={refreshTimestamp} />
+        <ISSTile size="squarish" refreshTimestamp={refreshTimestamp} />
         
         {/* News tiles with various NYT sections */}
         <NewsImageTile 
@@ -56,7 +58,7 @@ export default function Home() {
         
         {/* Earthquake tile */}
         <EarthquakeTile 
-          size="medium" 
+          size="squarish" 
           refreshTimestamp={refreshTimestamp}
           uniqueId="earthquake1"
         />
@@ -68,32 +70,45 @@ export default function Home() {
           section="science"
         />
         
-        <StockTile 
-          size="medium" 
-          refreshTimestamp={refreshTimestamp} 
-          uniqueId="stocks1"
+        <WikiTile 
+          size="squarish" 
+          refreshTimestamp={refreshTimestamp}
+          uniqueId="wiki2"
         />
 
-        <NewsTile 
+
+
+
+      
+
+        {/* First Wikipedia tile */}
+        <WikiTile 
+          size="squarish" 
+          refreshTimestamp={refreshTimestamp}
+          uniqueId="wiki1"
+        />
+
+
+<NewsTile 
           size="wide" 
           refreshTimestamp={refreshTimestamp} 
           section="business"
         />
+        
+        
+        
 
-        {/* First Wikipedia tile */}
-        <WikiTile 
-          size="medium" 
-          refreshTimestamp={refreshTimestamp}
-          uniqueId="wiki1"
+        <WeatherTile 
+          size="small" 
+          refreshTimestamp={refreshTimestamp} 
+          uniqueId="weather3"
         />
         
-        <Tile size="small">
-          <div className="text-center whitespace-pre-line">The shortest war in history lasted 38 minutes</div>
-        </Tile>
-
-        <Tile size="squarish">
-          <div className="text-center whitespace-pre-line">CO2 Levels{"\n"}{"\n"}418 ppm{"\n"}{"\n"}+2.3 ppm from last year</div>
-        </Tile>
+        
+        <EnvironmentalImpactTile 
+          size="squarish" 
+          refreshTimestamp={refreshTimestamp}
+        />
         
         {/* Second weather tile */}
         <WeatherTile 
@@ -102,27 +117,21 @@ export default function Home() {
           uniqueId="weather2"
         />
         
-        <Tile size="squarish">
-          <div className="text-center whitespace-pre-line">#1 on Global Charts: "Example Song" by Artist</div>
-        </Tile>
-        
+      
         <OnThisDayTile 
           size="squarish" 
           refreshTimestamp={refreshTimestamp}
         />
         
-        <NewsImageTile 
-          size="squarish" 
-          refreshTimestamp={refreshTimestamp} 
-          uniqueId="tile3" 
-          section="arts"
-        />
+    
         
         {/* Second Wikipedia tile */}
-        <WikiTile 
+       
+
+<MultiStockTile 
           size="small" 
           refreshTimestamp={refreshTimestamp}
-          uniqueId="wiki2"
+          uniqueId="multistocks1"
         />
         
         <NewsImageTile 
@@ -133,15 +142,25 @@ export default function Home() {
         />
 
         <BitcoinTile 
-          size="small" 
+          size="squarish" 
           refreshTimestamp={refreshTimestamp} 
           uniqueId="bitcoin1"
+        />
+
+
+<NewsImageTile 
+          size="squarish" 
+          refreshTimestamp={refreshTimestamp} 
+          uniqueId="tile3" 
+          section="arts"
         />
 
         <BabyCounterTile 
           size="small" 
           refreshTimestamp={refreshTimestamp}
         />
+        
+
 
         <NewsTile 
           size="wide" 
@@ -149,11 +168,24 @@ export default function Home() {
           section="world"
         />
 
-        <MultiStockTile 
+
+        
+
+<InternetStatsTile 
           size="squarish" 
           refreshTimestamp={refreshTimestamp}
-          uniqueId="multistocks1"
         />
+        
+        
+
+<WeatherTile 
+          size="small" 
+          refreshTimestamp={refreshTimestamp} 
+          uniqueId="weather4"
+        />
+        
+
+       
       </MasonryLayout>
     </Dashboard>
   );

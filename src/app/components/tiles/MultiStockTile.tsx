@@ -131,14 +131,6 @@ export default function MultiStockTile({
           </div>
         )}
         
-        <a 
-          href="https://finance.yahoo.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="block mt-3 text-xs text-gray-500 hover:text-gray-400"
-        >
-          View markets
-        </a>
       </div>
     </Tile>
   );
