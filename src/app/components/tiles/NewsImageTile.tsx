@@ -43,14 +43,17 @@ export default function NewsImageTile({
           ? `/api/news?section=${section}&preventDuplicates=true` 
           : '/api/news?preventDuplicates=true';
           
-        // Add unique ID with more randomness to prevent duplicate results
+        // Add unique ID with more randomness to prevent duplicate results AND ensure each tile gets different content
+        // Include section in uniqueId to ensure different sections get different articles
+        const timestamp = Date.now();
         const randomSuffix = Math.random().toString(36).substring(2, 10);
-        url += `&uniqueId=${uniqueId}-${randomSuffix}`;
+        url += `&uniqueId=${uniqueId}-${section || 'random'}-${timestamp}-${randomSuffix}`;
 
-        // Add timestamp to ensure fresh data
-        url += `&forceRefresh=true&t=${Date.now()}`;
+        // Explicitly request a force refresh occasionally
+        const shouldForceRefresh = Math.random() > 0.5; // 50% chance to force refresh
+        url += `&forceRefresh=${shouldForceRefresh}&t=${timestamp}`;
         
-        console.log(`Fetching news for tile ${uniqueId} with URL: ${url}`);
+        console.log(`Fetching news for section ${section} with tile ID ${uniqueId} (force refresh: ${shouldForceRefresh})`);
         
         const response = await fetch(url, {
           method: 'GET',
@@ -71,6 +74,7 @@ export default function NewsImageTile({
           throw new Error(data.error);
         }
         
+        console.log(`Received data for section ${section}:`, data.headline);
         setNewsData(data);
       } catch (err) {
         console.error('Error fetching news image:', err);
@@ -80,17 +84,17 @@ export default function NewsImageTile({
       }
     };
 
-    // Fetch immediately on mount
+    // Fetch immediately on mount or when refreshTimestamp changes
     fetchNews();
     
-    // Set up interval to fetch every 20 seconds
+    // Set up interval to fetch periodically (less frequently to avoid API rate limits)
     const interval = setInterval(() => {
       fetchNews();
-    }, 20000);
+    }, 40000); // 40 seconds instead of 20 to reduce API calls
     
     // Clean up the interval when the component unmounts
     return () => clearInterval(interval);
-  }, [section, uniqueId]); // Remove refreshTimestamp dependency
+  }, [section, uniqueId, refreshTimestamp]); // Include refreshTimestamp in dependencies
 
   if (isLoading) {
     return (
@@ -148,10 +152,10 @@ export default function NewsImageTile({
           </p>
           {newsData.link && (
             <a 
-              href={newsData.link} 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+              href={newsData.link}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mt-1 text-xs text-[var(--text-muted)] hover:text-[var(--accent-teal)]"
             >
               Read more
             </a>
