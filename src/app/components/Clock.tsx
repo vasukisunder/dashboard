@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Tile from './Tile';
+import Image from 'next/image';
 
 export default function Clock() {
   const [time, setTime] = useState(new Date());
@@ -30,11 +31,17 @@ export default function Clock() {
   return (
     <Tile size="wide" className="col-span-2 text-white">
       <div className="w-full flex justify-between items-center">
-        <div className="text-2xl sm:text-3xl font-mono tracking-wider">
-          {formatTime(time)}
+        <div className="relative h-12 w-36 flex items-center">
+          <Image 
+            src="/earth.png" 
+            alt="logo" 
+            width={140} 
+            height={48} 
+            className="object-contain"
+          />
         </div>
         <div className="text-right">
-          <div className="text-sm">What's happening on Earth right now?</div>
+          <div className="title">MACRODATA DASHBOARD</div>
           <div className="text-xs text-[var(--accent-teal)]">Real-time data dashboard</div>
         </div>
       </div>

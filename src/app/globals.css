@@ -12,7 +12,7 @@
   --accent-green: #456e63;
   --text-muted: #a0a0a0;
   --tile-hover: #232f34;
-  --scanline-opacity: 0.25;
+  --scanline-opacity: 0.4;
   --crt-flicker: 0.03;
 }
 
@@ -45,6 +45,14 @@ body {
   font-family: 'Manifold';
   src: url('/fonts/manifold.otf') format('opentype');
   font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manifold';
+  src: url('/fonts/manifold-bold.otf') format('opentype');
+  font-weight: bold;
   font-style: normal;
   font-display: swap;
 }
@@ -172,4 +180,12 @@ div.text-xs.text-\[var\(--accent-teal\)\] {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-size: 10px;
+}
+
+.title {
+  font-family: 'Manifold', sans-serif;
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 16px;
 }
