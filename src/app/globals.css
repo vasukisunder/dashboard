@@ -2,17 +2,17 @@
 
 :root {
   /* Severance-inspired color palette */
-  --background: #283a3e;
+  --background: #011315;
   --foreground: #e6e6e6;
-  --tile-background: #141e20;
-  --tile-border: #7b9b86;
-  --accent-teal: #3da5b0;
+  --tile-background: #051924;
+  --tile-border: #031621;
+  --accent-teal: #83E8FF;
   --accent-navy: #2d4f7c;
   --accent-red: #c9383e;
   --accent-green: #456e63;
   --text-muted: #a0a0a0;
   --tile-hover: #232f34;
-  --scanline-opacity: 0.15;
+  --scanline-opacity: 0.25;
   --crt-flicker: 0.03;
 }
 
@@ -33,10 +33,26 @@ body {
   padding: 0;
 }
 
+@font-face {
+  font-family: 'Input';
+  src: url('/fonts/input.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manifold';
+  src: url('/fonts/manifold.otf') format('opentype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-sans, Arial, Helvetica, sans-serif);
+  font-family: 'Input', monospace;
   -webkit-font-smoothing: antialiased;
   position: relative;
   overflow: hidden;
@@ -139,4 +155,21 @@ body::after {
   pointer-events: none;
   animation: flicker 0.3s infinite alternate;
   mix-blend-mode: overlay;
+}
+
+/* Apply Manifold font to all headers */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Manifold', sans-serif;
+  font-weight: normal;
+}
+
+/* Apply Manifold font to tile headers */
+div[class*="text-xs"][class*="text-[var(--accent-teal)]"],
+div.text-xs.text-\[var\(--accent-teal\)\].mb-1,
+div.text-xs.text-\[var\(--accent-teal\)\] {
+  font-family: 'Input', sans-serif;
+  font-weight: normal;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  font-size: 10px;
 }
