@@ -54,7 +54,7 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
         setError(null);
         
         // Fetch ISS location
-        const response = await fetch('http://api.open-notify.org/iss-now.json', {
+        const response = await fetch('https://api.open-notify.org/iss-now.json', {
           method: 'GET',
           cache: 'no-store',
           headers: {
