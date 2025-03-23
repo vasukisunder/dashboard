@@ -113,7 +113,7 @@ export default function BitcoinTile({
   return (
     <Tile size={size}>
       <div className="w-full text-sm text-left">
-        <div className="text-xs text-gray-500 mb-1">
+        <div className="text-xs text-[var(--accent-teal)] mb-1">
           Bitcoin Price
         </div>
         BTC: ${bitcoinData.price.toLocaleString()}

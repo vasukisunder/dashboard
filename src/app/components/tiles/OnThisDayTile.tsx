@@ -144,7 +144,7 @@ export default function OnThisDayTile({ size = "squarish", refreshTimestamp }: O
   return (
     <Tile size={size}>
       <div className="w-full text-sm text-left">
-        <div className="text-xs text-gray-500 mb-1">
+        <div className="text-xs text-[var(--accent-teal)] mb-1">
           {data.type === 'events' ? 'Historical Event' : data.type === 'births' ? 'Born on This Day' : 'Died on This Day'}
         </div>
         {data.text}

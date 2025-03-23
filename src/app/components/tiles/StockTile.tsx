@@ -130,7 +130,7 @@ export default function StockTile({
   return (
     <Tile size={size}>
       <div className="w-full text-sm text-left">
-        <div className="text-xs text-gray-500 mb-1">
+        <div className="text-xs text-[var(--accent-teal)] mb-1">
           Stock Market
         </div>
         {stockData.length > 0 && (

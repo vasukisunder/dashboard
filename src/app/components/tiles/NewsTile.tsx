@@ -115,7 +115,7 @@ export default function NewsTile({ section, size = "wide", refreshTimestamp }: N
   return (
     <Tile size={size}>
       <div className="w-full text-sm text-left">
-        <div className="text-xs text-gray-500 mb-1">
+        <div className="text-xs text-[var(--accent-teal)] mb-1">
           Latest News
         </div>
         {newsData.headline}

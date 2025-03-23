@@ -32,11 +32,15 @@ let newsCache: {
   }
 } = {};
 
+// API call tracking to prevent rate limit issues
+let lastApiCallTime = 0;
+const MIN_API_CALL_INTERVAL = 10000; // Minimum 10 seconds between API calls
+
 // Track used photo URLs globally to avoid duplicates across tiles
 const usedPhotoUrls = new Set<string>();
 
-// Cache expiry in minutes - drastically reducing to get fresh content more often
-const CACHE_EXPIRY = 10; // Only cache for 10 minutes
+// Cache expiry in minutes - setting to a moderate value to balance freshness with API limits
+const CACHE_EXPIRY = 60; // Cache for 1 hour to avoid hitting rate limits
 
 // Number of articles to rotate through before potentially seeing repeats
 const MIN_ARTICLES_BEFORE_REPEAT = 10;
@@ -57,8 +61,11 @@ export async function GET(request: Request) {
     let section = searchParams.get('section');
     const preventDuplicates = searchParams.get('preventDuplicates') !== 'false'; // Default to true
     
-    // Always force refresh to get fresh content
-    const forceRefresh = true;
+    // Only force refresh if explicitly requested and enough time has passed
+    const forceRefreshRequested = searchParams.get('forceRefresh') === 'true';
+    const currentTime = Date.now();
+    const timePassedSinceLastCall = currentTime - lastApiCallTime;
+    const forceRefresh = forceRefreshRequested && timePassedSinceLastCall > MIN_API_CALL_INTERVAL;
     
     // Add request counter to uniqueId to ensure randomness
     const uniqueId = `${searchParams.get('uniqueId') || 'default'}-${requestCounter}-${Date.now()}`;
@@ -73,87 +80,163 @@ export async function GET(request: Request) {
                           (now - newsCache[section].timestamp) > CACHE_EXPIRY * 60 * 1000 ||
                           forceRefresh;
     
-    // If we need fresh data or cached data doesn't have enough articles, fetch new data
-    if (needsRefresh || (newsCache[section]?.articles.length < MIN_ARTICLES_BEFORE_REPEAT)) {
+    // Check if we have cached data that we can use instead of making an API call
+    if (!needsRefresh && newsCache[section]?.articles.length >= MIN_ARTICLES_BEFORE_REPEAT) {
+      const articleCount = newsCache[section].articles.length;
+      
+      // Select a random article that hasn't been used recently if possible
+      let randomIndex;
+      
+      if (preventDuplicates) {
+        // Find an index that hasn't been used recently
+        const usedIndices = newsCache[section].usedIndices;
+        const availableIndices = Array.from(
+          { length: articleCount }, 
+          (_, i) => i
+        ).filter(i => !usedIndices.has(i));
+        
+        if (availableIndices.length > 0) {
+          // Use a random unused index
+          randomIndex = availableIndices[Math.floor(Math.random() * availableIndices.length)];
+        } else {
+          // If all indices have been used, select a completely random one
+          randomIndex = Math.floor(Math.random() * articleCount);
+          // And clear the used indices to start fresh
+          newsCache[section].usedIndices.clear();
+        }
+        
+        // Mark this index as used
+        newsCache[section].usedIndices.add(randomIndex);
+      } else {
+        // If not preventing duplicates, just use a random index
+        randomIndex = Math.floor(Math.random() * articleCount);
+      }
+      
+      console.log(`Using cached article ${randomIndex} of ${articleCount} for section: ${section}`);
+      
+      const article = newsCache[section].articles[randomIndex];
+      
+      // Get the image URL if available
+      const photo_url = article.multimedia && article.multimedia.length > 0 
+        ? article.multimedia[0].url 
+        : null;
+        
+      return NextResponse.json({
+        section,
+        headline: article.title,
+        source: 'The New York Times',
+        sectionName: formatSectionName(section),
+        photo_url: photo_url,
+        link: article.url,
+        snippet: article.abstract || null
+      });
+    }
+    
+    // If we need fresh data and enough time has passed since last API call
+    if ((needsRefresh || newsCache[section]?.articles.length < MIN_ARTICLES_BEFORE_REPEAT) && 
+        timePassedSinceLastCall > MIN_API_CALL_INTERVAL) {
       try {
         console.log(`Fetching fresh news data for section: ${section} (request ${requestCounter})`);
+        lastApiCallTime = currentTime; // Update last API call time
         
-        // Fetch news from two different sections to get more variety
-        const extraSection = getRandomSection();
-        console.log(`Also fetching from extra section: ${extraSection} for more variety`);
-        
+        // Fetch news from the requested section
         const mainUrl = `https://api.nytimes.com/svc/topstories/v2/${section}.json?api-key=${NYT_API_KEY}`;
-        const extraUrl = `https://api.nytimes.com/svc/topstories/v2/${extraSection}.json?api-key=${NYT_API_KEY}`;
         
-        // Fetch both in parallel for efficiency
-        const [mainResponse, extraResponse] = await Promise.all([
-          fetch(mainUrl, {
-            method: 'GET',
-            cache: 'no-store',
-            headers: {
-              'Accept': 'application/json'
-            }
-          }),
-          fetch(extraUrl, {
-            method: 'GET',
-            cache: 'no-store',
-            headers: {
-              'Accept': 'application/json'
-            }
-          })
-        ]);
+        const mainResponse = await fetch(mainUrl, {
+          method: 'GET',
+          cache: 'no-store',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
         
         if (!mainResponse.ok) {
           console.warn(`NYT API main section responded with status: ${mainResponse.status}`);
-        }
-        
-        if (!extraResponse.ok) {
-          console.warn(`NYT API extra section responded with status: ${extraResponse.status}`);
+          throw new Error(`NYT API responded with status: ${mainResponse.status}`);
         }
         
         // Process main section data
         let mainArticles: any[] = [];
-        if (mainResponse.ok) {
-          const mainData = await mainResponse.json();
-          if (mainData.results && mainData.results.length > 0) {
-            mainArticles = mainData.results.filter(
-              (article: any) => article.multimedia && article.multimedia.length > 0
-            );
-          }
+        const mainData = await mainResponse.json();
+        
+        if (mainData.results && mainData.results.length > 0) {
+          // Prioritize articles with images but include all for more diversity
+          const articlesWithImages = mainData.results.filter(
+            (article: any) => article.multimedia && article.multimedia.length > 0
+          );
+          
+          const articlesWithoutImages = mainData.results.filter(
+            (article: any) => !article.multimedia || article.multimedia.length === 0
+          );
+          
+          // Prioritize articles with images by putting them first
+          mainArticles = [...articlesWithImages, ...articlesWithoutImages];
         }
         
-        // Process extra section data
-        let extraArticles: any[] = [];
-        if (extraResponse.ok) {
-          const extraData = await extraResponse.json();
-          if (extraData.results && extraData.results.length > 0) {
-            extraArticles = extraData.results.filter(
-              (article: any) => article.multimedia && article.multimedia.length > 0
-            );
-          }
+        if (mainArticles.length === 0) {
+          throw new Error('No articles found for this section');
         }
         
-        // Combine and shuffle articles
-        let allArticles = [...mainArticles, ...extraArticles];
+        // Shuffle articles for randomness
+        const shuffledArticles = shuffleArray(mainArticles);
         
-        if (allArticles.length === 0) {
-          throw new Error('No articles with images found');
-        }
+        console.log(`Loaded ${shuffledArticles.length} articles for section: ${section}`);
         
-        // Double-shuffle for more randomness
-        allArticles = shuffleArray(shuffleArray(allArticles));
-        
-        console.log(`Loaded ${allArticles.length} articles total (${mainArticles.length} from ${section}, ${extraArticles.length} from ${extraSection})`);
-        
-        // Clear the usedIndices to start fresh
+        // Update the cache
         newsCache[section] = {
-          articles: allArticles,
+          articles: shuffledArticles,
           timestamp: now,
           usedIndices: new Set()
         };
+        
+        // Select a random article from the fresh data
+        const randomIndex = Math.floor(Math.random() * shuffledArticles.length);
+        const article = shuffledArticles[randomIndex];
+        
+        // Mark this index as used
+        newsCache[section].usedIndices.add(randomIndex);
+        
+        // Get the image URL if available
+        const photo_url = article.multimedia && article.multimedia.length > 0 
+          ? article.multimedia[0].url 
+          : null;
+          
+        return NextResponse.json({
+          section,
+          headline: article.title,
+          source: 'The New York Times',
+          sectionName: formatSectionName(section),
+          photo_url: photo_url,
+          link: article.url,
+          snippet: article.abstract || null
+        });
       } catch (apiError) {
         console.error('NYT API call failed:', apiError);
-        // Mock news data to use if API fails
+        
+        // If we have any cached data for this section, use it instead of dummy data
+        if (newsCache[section] && newsCache[section].articles.length > 0) {
+          console.log(`API call failed, falling back to cached data for section: ${section}`);
+          
+          const randomIndex = Math.floor(Math.random() * newsCache[section].articles.length);
+          const article = newsCache[section].articles[randomIndex];
+          
+          // Get the image URL if available
+          const photo_url = article.multimedia && article.multimedia.length > 0 
+            ? article.multimedia[0].url 
+            : null;
+            
+          return NextResponse.json({
+            section,
+            headline: article.title,
+            source: 'The New York Times',
+            sectionName: formatSectionName(section),
+            photo_url: photo_url,
+            link: article.url,
+            snippet: article.abstract || null
+          });
+        }
+        
+        // Mock news data to use only if API fails AND we have no cached data
         const dummyNews = [
           {
             headline: "Global climate conference proposes new emissions targets",
@@ -235,40 +318,71 @@ export async function GET(request: Request) {
           snippet: randomNews.snippet
         });
       }
-    }
-    
-    // If we have cached data for this section
-    if (newsCache[section] && newsCache[section].articles.length > 0) {
-      const articleCount = newsCache[section].articles.length;
-      
-      // Always choose a truly random article, ignoring previous usage
-      // This ensures maximum variety even if it means repeating occasionally
-      const randomIndex = Math.floor(Math.random() * articleCount);
-      
-      console.log(`Selected random article ${randomIndex} of ${articleCount} for section: ${section}`);
-      
-      const article = newsCache[section].articles[randomIndex];
-      
-      // Get the image URL if available
-      const photo_url = article.multimedia && article.multimedia.length > 0 
-        ? article.multimedia[0].url 
-        : null;
+    } else {
+      // If we need fresh data but not enough time has passed since last API call,
+      // use cached data if available
+      if (newsCache[section] && newsCache[section].articles.length > 0) {
+        console.log(`Using cached data for section: ${section} (rate limit protection)`);
         
-      // Don't track used photo URLs anymore to maximize variety
-      // Instead, we'll rely on the larger pool of articles and true randomness
+        const randomIndex = Math.floor(Math.random() * newsCache[section].articles.length);
+        const article = newsCache[section].articles[randomIndex];
         
-      return NextResponse.json({
-        section,
-        headline: article.title,
-        source: 'The New York Times',
-        sectionName: formatSectionName(section),
-        photo_url: photo_url,
-        link: article.url,
-        snippet: article.abstract || null
-      });
+        // Get the image URL if available
+        const photo_url = article.multimedia && article.multimedia.length > 0 
+          ? article.multimedia[0].url 
+          : null;
+          
+        return NextResponse.json({
+          section,
+          headline: article.title,
+          source: 'The New York Times',
+          sectionName: formatSectionName(section),
+          photo_url: photo_url,
+          link: article.url,
+          snippet: article.abstract || null
+        });
+      } else {
+        // If we have no cached data and can't make an API call, use dummy data
+        console.log(`Using dummy data for section: ${section} (rate limit protection)`);
+        
+        // Use the dummy news logic from above (same as in the catch block)
+        const dummyNews = [
+          {
+            headline: "Global climate conference proposes new emissions targets",
+            source: "The New York Times",
+            photo_url: "https://images.unsplash.com/photo-1611270629569-8b357cb88da9?q=80&w=1000&auto=format&fit=crop",
+            link: "https://www.nytimes.com/",
+            snippet: "World leaders gathered to discuss new climate initiatives."
+          },
+          // ...other dummy news items (same as above)
+        ];
+        
+        // Rest of dummy news logic (same as above)
+        let availableNews = dummyNews.filter(news => !usedPhotoUrls.has(news.photo_url));
+        
+        if (availableNews.length === 0) {
+          usedPhotoUrls.clear();
+          availableNews = dummyNews;
+        }
+        
+        const randomIndex = Math.floor(Math.random() * availableNews.length);
+        const randomNews = availableNews[randomIndex];
+        
+        usedPhotoUrls.add(randomNews.photo_url);
+        
+        const fakeSection = section || "world";
+        
+        return NextResponse.json({
+          section: fakeSection,
+          headline: randomNews.headline,
+          source: randomNews.source,
+          sectionName: formatSectionName(fakeSection),
+          photo_url: randomNews.photo_url,
+          link: randomNews.link,
+          snippet: randomNews.snippet
+        });
+      }
     }
-    
-    // Fallback to existing mock data code...
   } catch (error) {
     console.error('News API error:', error);
     return NextResponse.json(

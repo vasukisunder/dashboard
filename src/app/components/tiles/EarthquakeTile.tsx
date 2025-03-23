@@ -71,7 +71,7 @@ export default function EarthquakeTile({
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
-          <div className="text-xs text-gray-500 mb-1">
+          <div className="text-xs text-[var(--accent-teal)] mb-1">
             Recent Earthquake
           </div>
           Loading earthquake data...
@@ -84,7 +84,7 @@ export default function EarthquakeTile({
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
-          <div className="text-xs text-gray-500 mb-1">
+          <div className="text-xs text-[var(--accent-teal)] mb-1">
             Recent Earthquake
           </div>
           Unable to load earthquake data
@@ -97,7 +97,7 @@ export default function EarthquakeTile({
     return (
       <Tile size={size}>
         <div className="w-full text-sm text-left">
-          <div className="text-xs text-gray-500 mb-1">
+          <div className="text-xs text-[var(--accent-teal)] mb-1">
             Recent Earthquake
           </div>
           No earthquake data available
@@ -109,7 +109,7 @@ export default function EarthquakeTile({
   return (
     <Tile size={size}>
       <div className="w-full text-sm text-left">
-        <div className="text-xs text-gray-500 mb-1">
+        <div className="text-xs text-[var(--accent-teal)] mb-1">
           Recent Earthquake
         </div>
         A magnitude {quakeData.magnitude} earthquake was detected {quakeData.location}
@@ -118,7 +118,7 @@ export default function EarthquakeTile({
             href={quakeData.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+            className="block mt-1 text-xs text-[var(--text-muted)] hover:text-[var(--accent-teal)]"
           >
             View details
           </a>
