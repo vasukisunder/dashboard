@@ -4,7 +4,11 @@ import { useState, useEffect } from 'react';
 import Tile from './Tile';
 import Image from 'next/image';
 
-export default function Clock() {
+interface ClockProps {
+  onClickImage?: () => void;
+}
+
+export default function Clock({ onClickImage }: ClockProps) {
   const [time, setTime] = useState(new Date());
   
   useEffect(() => {
@@ -34,10 +38,11 @@ export default function Clock() {
         <div className="relative h-12 w-36 flex items-center">
           <Image 
             src="/earth.png" 
-            alt="logo" 
+            alt="Digital Clock" 
             width={140} 
             height={48} 
-            className="object-contain"
+            className="object-contain cursor-pointer hover:opacity-80 transition-opacity"
+            onClick={onClickImage}
           />
         </div>
         <div className="text-right">
