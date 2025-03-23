@@ -53,29 +53,43 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
         setIsLoading(true);
         setError(null);
         
-        // Fetch ISS location
-        const response = await fetch('https://api.open-notify.org/iss-now.json', {
-          method: 'GET',
-          cache: 'no-store',
+        console.log('ISSTile: Fetching from /api/iss');
+        // Use our internal API route instead of directly calling the external API
+        const response = await fetch(`/api/iss?t=${Date.now()}`, {
           headers: {
             'Accept': 'application/json'
-          }
+          },
+          cache: 'no-store'
         });
         
+        console.log('ISSTile: Response status:', response.status);
+        
         if (!response.ok) {
-          throw new Error(`Failed to fetch ISS location: ${response.status}`);
+          const errorText = await response.text();
+          console.error('ISSTile: Error response:', errorText);
+          throw new Error(`Failed to fetch ISS location: ${response.status} - ${errorText}`);
         }
         
-        const data: ISSData = await response.json();
+        const data = await response.json();
+        console.log('ISSTile: Got data:', data);
         
-        if (data.message !== 'success') {
+        // Check if the API returned an error
+        if (data.error) {
+          throw new Error(data.error);
+        }
+        
+        // Allow for fallback data that might not have "success" message
+        if (data.message !== 'success' && !data.iss_position) {
           throw new Error('Invalid ISS data received');
         }
         
         setIssData(data);
-
+        
+        // Extract coordinates, handle both original and fallback format
+        const latitude = data.iss_position?.latitude || '0';
+        const longitude = data.iss_position?.longitude || '0';
+        
         // Fetch location name using our proxy API
-        const { latitude, longitude } = data.iss_position;
         console.log('Fetching location for coordinates:', latitude, longitude);
         
         const geocodeResponse = await fetch(
@@ -149,7 +163,7 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
         console.log('Selected location name:', locationName);
         setLocation(locationName);
       } catch (err) {
-        console.error('Error fetching ISS location:', err);
+        console.error('ISSTile: Error fetching ISS location:', err);
         setError(err instanceof Error ? err.message : 'Failed to load ISS location');
       } finally {
         setIsLoading(false);
@@ -165,7 +179,7 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
   if (isLoading) {
     return (
       <Tile size={size}>
-        <div className="w-full text-sm text-left">
+        <div className="w-full text-sm text-left text-white">
           Loading ISS location...
         </div>
       </Tile>
@@ -175,7 +189,7 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
   if (error) {
     return (
       <Tile size={size}>
-        <div className="w-full text-sm text-left">
+        <div className="w-full text-sm text-left text-white">
           Unable to load ISS location: {error}
         </div>
       </Tile>
@@ -185,7 +199,7 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
   if (!issData || !location) {
     return (
       <Tile size={size}>
-        <div className="w-full text-sm text-left">
+        <div className="w-full text-sm text-left text-white">
           No ISS location data available
         </div>
       </Tile>
@@ -197,8 +211,8 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
 
   return (
     <Tile size={size}>
-      <div className="w-full text-sm text-left">
-        <div className="text-xs text-gray-500 mb-1">
+      <div className="w-full text-sm text-left text-white">
+        <div className="text-xs text-[var(--accent-teal)] mb-1">
           ISS Location
         </div>
         The ISS is currently flying over {location}
@@ -206,7 +220,7 @@ export default function ISSTile({ size = "squarish", refreshTimestamp }: ISSTile
           href="https://spotthestation.nasa.gov/tracking_map.cfm"
           target="_blank"
           rel="noopener noreferrer"
-          className="block mt-1 text-xs text-gray-500 hover:text-gray-400"
+          className="block mt-1 text-xs text-[var(--text-muted)] hover:text-[var(--accent-teal)]"
         >
           View tracker
         </a>
